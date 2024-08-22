@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Visite 360 cepegra</title>
+		<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+		<script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+	</head>
+
+	<body>
+		<a-scene
+			renderer="antialias: true; colorManagement: true;"
+			loading-screen="dotsColor: orange; backgroundColor: black"
+		>
+			<a-assets>
+				<img
+					id="demoscene1"
+					src="assets/cepegra/1_couloir_1.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene2"
+					src="assets/cepegra/1_couloir_2.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene3"
+					src="assets/cepegra/1_couloir_3.JPG"
+					preload
+					crossorigin
+				/>
+				<img id="demoscene4" src="assets/cepegra/1_hall.JPG" preload crossorigin />
+				<img
+					id="demoscene5"
+					src="assets/cepegra/1_passerelle.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene6"
+					src="assets/cepegra/1_secretariat_1.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene7"
+					src="assets/cepegra/1_secretariat_2.JPG"
+					preload
+					crossorigin
+				/>
+				<img id="demoscene8" src="assets/cepegra/2_hall.JPG" preload crossorigin />
+				<img
+					id="demoscene9"
+					src="assets/cepegra/rez_accueil.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene10"
+					src="assets/cepegra/rez_atelier.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene11"
+					src="assets/cepegra/rez_couloir.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene12"
+					src="assets/cepegra/rez_couloir_2.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene13"
+					src="assets/cepegra/rez_couloir_3.JPG"
+					preload
+					crossorigin
+				/>
+
+				<a-mixin
+					id="viewsphere"
+					position="0 -100 0"
+					geometry="primitive: sphere; radius:20; segmentsWidth:128; segmentsHeight:128"
+					material="shader:flat; side: back; repeat:-1 1;"
+				></a-mixin>
+
+				<a-mixin
+					id="marker"
+					position="0 0 10"
+					geometry="primitive: circle; radius:1.5"
+					material="shader:flat; color:red; opacity:0.5;side:double;"
+					animation="property:geometry.radius; to:1; dur:1000; loop:true;dir:alternate;"
+					event-set__enter="_event: mouseenter; scale:1.5 1.5 1.5;"
+					event-set__leave="_event: mouseleave; scale:1 1 1;"
+				></a-mixin>
+			</a-assets>
+
+			<!-- TEST -->
+			<a-entity
+				id="view_1"
+				mixin="viewsphere"
+				material="src: #demoscene1;"
+				position="0 0 0"
+			>
+				<a-entity position="0 0 0" rotation="10 90 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_1; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_2; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="10 -20 0">
+					<a-entity
+						mixin="marker"
+						material="shader:flat; color:blue; opacity:0.5;side:double;"
+						event-set__hideview="_event: mousedown; _target:#view_1; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_3; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<a-entity id="view_2" mixin="viewsphere" material="src: #demoscene2;">
+				<a-entity position="0 0 0" rotation="10 260 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_2; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_1; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<a-entity id="view_3" mixin="viewsphere" material="src: #demoscene3;">
+				<a-entity position="0 0 0" rotation="10 -270 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_3; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_2; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- RIG -->
+			<a-entity id="rig" rotation="0 0 0">
+				<!-- HMD -->
+				<a-entity id="hmd" camera="far:20" look-controls position="0 0 0">
+					<a-entity
+						cursor="rayOrigin: mouse"
+						raycaster="objects:[mixin=marker]; far:20;"
+					></a-entity>
+				</a-entity>
+
+				<!-- RIGHT CONTROLLER -->
+				<a-entity
+					laser-controls="hand: right;"
+					raycaster="lineColor: red; objets: [mixin=marker]; far:20"
+				></a-entity>
+
+				<!-- LEFT CONTROLLER -->
+				<a-entity
+					laser-controls="hand: left;"
+					raycaster="lineColor: green; objets: [mixin=marker]; far:20"
+				></a-entity>
+			</a-entity>
+		</a-scene>
+
+		<!-- <script>
+			document.addEventListener("click", () => {
+				var entity = document.querySelector("[autoplaysound]");
+				entity.components.sound.playSound();
+			});
+		</script> -->
+	</body>
+</html>
