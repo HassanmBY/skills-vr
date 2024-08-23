@@ -7,6 +7,63 @@
 		<title>Visite 360 cepegra</title>
 		<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
 		<script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+
+		<script id="vertexShader" type="x-shader/x-vertex">
+			varying vec2 vUv;
+			varying vec3 vWorldPosition;
+
+			void main() {
+			    vUv = uv;
+			    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+			    vWorldPosition = worldPosition.xyz;
+			    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+		</script>
+
+		<script id="fragmentShader" type="x-shader/x-fragment">
+			varying vec2 vUv;
+			varying vec3 vWorldPosition;
+			uniform float time;
+			void main() {
+						float dist = distance(vWorldPosition, cameraPosition);
+
+						// Define color stops
+						vec3 colorClose = vec3(1.0, 0.0, 0.0);  // Red when close
+						vec3 colorMid = vec3(0.0, 1.0, 0.0);// Green at medium distance
+						vec3 colorFar = vec3(0.0, 0.0, 1.0);// Blue when far
+
+						// Define distance thresholds
+						float closeThreshold = -50.0;
+						float farThreshold = 25.0;
+
+						// Normalize distance
+						float t = smoothstep(closeThreshold, farThreshold, dist);
+
+						// Interpolate between colors based on distance
+						vec3 color;
+						if (t < 0.5) {
+							color = mix(colorClose, colorMid, t * 2.0);
+						} else {
+							color = mix(colorMid, colorFar, (t - 0.5) * 2.0);
+						}
+
+						// Add a subtle wave effect
+						float wave = sin(dist * 0.5 - time * 0.005) * 0.33 + 0.99;
+						color *= wave;
+
+						gl_FragColor = vec4(color, 0.5);
+						}
+		</script>
+
+		<script defer>
+			AFRAME.registerShader("camera-animated", {
+				schema: {
+					time: { type: "time", is: "uniform" },
+				},
+				vertexShader: document.getElementById("vertexShader").textContent,
+				fragmentShader: document.getElementById("fragmentShader").textContent,
+			});
+		</script>
 	</head>
 
 	<body>
@@ -59,27 +116,35 @@
 					preload
 					crossorigin
 				/>
+
 				<img
 					id="demoscene10"
-					src="assets/cepegra/rez_atelier.JPG"
-					preload
-					crossorigin
-				/>
-				<img
-					id="demoscene11"
 					src="assets/cepegra/rez_couloir.JPG"
 					preload
 					crossorigin
 				/>
 				<img
-					id="demoscene12"
+					id="demoscene11"
 					src="assets/cepegra/rez_couloir_2.JPG"
 					preload
 					crossorigin
 				/>
 				<img
-					id="demoscene13"
+					id="demoscene12"
 					src="assets/cepegra/rez_couloir_3.JPG"
+					preload
+					crossorigin
+				/>
+				<img
+					id="demoscene13"
+					src="assets/cepegra/rez_atelier.JPG"
+					preload
+					crossorigin
+				/>
+
+				<img
+					id="demoscene14"
+					src="assets/cepegra/rez_entree.JPG"
 					preload
 					crossorigin
 				/>
@@ -94,15 +159,16 @@
 				<a-mixin
 					id="marker"
 					position="0 0 10"
-					geometry="primitive: circle; radius:1.5"
-					material="shader:flat; color:red; opacity:0.5;side:double;"
-					animation="property:geometry.radius; to:1; dur:1000; loop:true;dir:alternate;"
-					event-set__enter="_event: mouseenter; scale:1.5 1.5 1.5;"
-					event-set__leave="_event: mouseleave; scale:1 1 1;"
+					geometry="primitive: circle; radius: 0.75"
+					animation="property: geometry.radius; to: 1; dur: 2000; loop: true; dir: alternate"
+					animation__rotation="property: rotation; dur: 9000; from: 0 0 0; to: 0 360 0; dir: normal; easing: linear; loop: true;"
+					material="shader: camera-animated; opacity: 0.8; side: double"
+					event-set__enter="_event: mouseenter; scale: 1.5 1.5 1.5"
+					event-set__leave="_event: mouseleave; scale: 1 1 1"
 				></a-mixin>
 			</a-assets>
 
-			<!-- TEST -->
+			<!-- cage escaliers -->
 			<a-entity
 				id="view_1"
 				mixin="viewsphere"
@@ -122,15 +188,35 @@
 				<a-entity position="0 0 0" rotation="10 -20 0">
 					<a-entity
 						mixin="marker"
-						material="shader:flat; color:blue; opacity:0.5;side:double;"
 						event-set__hideview="_event: mousedown; _target:#view_1; position:0 -100 0;"
 						event-set__showview="_event: mousedown; _target:#view_3; position:0 0 0;"
 						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
 					>
 					</a-entity>
 				</a-entity>
+
+				<a-entity position="0 0 0" rotation="10 -110 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_1; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_5; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="26 -72 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_1; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_12; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
 			</a-entity>
 
+			<!-- Poubelles -->
 			<a-entity id="view_2" mixin="viewsphere" material="src: #demoscene2;">
 				<a-entity position="0 0 0" rotation="10 260 0">
 					<a-entity
@@ -141,14 +227,275 @@
 					>
 					</a-entity>
 				</a-entity>
+
+				<a-entity position="0 0 0" rotation="10 0 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_2; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_4; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
 			</a-entity>
 
+			<!-- Aqua -->
 			<a-entity id="view_3" mixin="viewsphere" material="src: #demoscene3;">
 				<a-entity position="0 0 0" rotation="10 -270 0">
 					<a-entity
 						mixin="marker"
 						event-set__hideview="_event: mousedown; _target:#view_3; position:0 -100 0;"
 						event-set__showview="_event: mousedown; _target:#view_1; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- Hall 1 -->
+			<a-entity id="view_4" mixin="viewsphere" material="src: #demoscene4;">
+				<a-entity position="0 0 0" rotation="10 -100 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_4; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_2; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="30 -30 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_4; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_9; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="-20 -50 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_4; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_8; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- Passerelle -->
+			<a-entity id="view_5" mixin="viewsphere" material="src: #demoscene5;">
+				<a-entity position="0 0 0" rotation="10 -65 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_5; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_1; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="10 35 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_5; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_6; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="10 98 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_5; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_7; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- Secretariat 1 -->
+
+			<a-entity id="view_6" mixin="viewsphere" material="src: #demoscene6;">
+				<a-entity position="0 0 0" rotation="10 105 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_6; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_5; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- Secretariat 2 -->
+
+			<a-entity id="view_7" mixin="viewsphere" material="src: #demoscene7;">
+				<a-entity position="0 0 0" rotation="10 -35 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_7; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_5; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- 2 Hall -->
+
+			<a-entity id="view_8" mixin="viewsphere" material="src: #demoscene8;">
+				<a-entity position="0 0 0" rotation="20 -90 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_8; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_4; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- rez entry -->
+
+			<a-entity id="view_9" mixin="viewsphere" material="src: #demoscene9;">
+				<a-entity position="0 0 0" rotation="-10 -300 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_9; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_4; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+				<a-entity position="0 0 0" rotation="10 275 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_9; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_14; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="10 0 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_9; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_10; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- couloir 1 -->
+
+			<a-entity id="view_10" mixin="viewsphere" material="src: #demoscene10;">
+				<a-entity position="0 0 0" rotation="5 90 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_10; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_11; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+				<a-entity position="0 0 0" rotation="5 -90 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_10; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_9; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- couloir 2 -->
+
+			<a-entity id="view_11" mixin="viewsphere" material="src: #demoscene11;">
+				<a-entity position="0 0 0" rotation="5 185 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_11; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_12; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="5 275 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_11; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_10; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- couloir 3 -->
+
+			<a-entity id="view_12" mixin="viewsphere" material="src: #demoscene12;">
+				<a-entity position="0 0 0" rotation="-21.87 78.72 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_12; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_1; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="0 170 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_12; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_13; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+
+				<a-entity position="0 0 0" rotation="5 263 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_12; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_11; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- atelier -->
+
+			<a-entity id="view_13" mixin="viewsphere" material="src: #demoscene13;">
+				<a-entity position="0 0 0" rotation="10 -96.9 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_13; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_12; position:0 0 0;"
+						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
+					>
+					</a-entity>
+				</a-entity>
+			</a-entity>
+
+			<!-- outside -->
+
+			<a-entity id="view_14" mixin="viewsphere" material="src: #demoscene14;">
+				<a-entity position="0 0 0" rotation="10 277 0">
+					<a-entity
+						mixin="marker"
+						event-set__hideview="_event: mousedown; _target:#view_14; position:0 -100 0;"
+						event-set__showview="_event: mousedown; _target:#view_9; position:0 0 0;"
 						event-set__orient="_event: mousedown; _target:#rig; rotation:0 -100 0;"
 					>
 					</a-entity>
